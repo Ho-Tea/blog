@@ -5,7 +5,7 @@ const siteConfig = {
   repositoryName: "", // GitHub 저장소 이름
   mainColor: "#6667AB", // 사이트의 주 색상
   textColor: "#727272", // 기본 텍스트 색상
-  blogTitle: "호오티디", // 블로그 제목
+  blogTitle: "호오티디📚", // 블로그 제목
 };
 
 // 여러명의 저자가 글을 쓸 경우 프로필 설정, default는 0번째 사용자
@@ -16,7 +16,7 @@ const users = [
     username: "호티",
     company: "백수",
     position: "CEO",
-    img: "img/user/profile.jpg",
+    img: "img/user/profile.png",
   },
 ];
 
