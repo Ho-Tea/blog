@@ -112,7 +112,7 @@ deleteByMemberIdAndId(loginMember.getId(), id);
 
 > 아래와 같이 JPA 리포지토리 구현체에 자동으로 트랜잭션이 설정됩니다.
 > 
-![image](/img/blog/0204-1.png)
+![image](/img/0204-1.png)
 
 ### 결론
 
