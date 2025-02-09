@@ -31,9 +31,9 @@ org.springframework.dao.InvalidDataAccessApiUsageException: No EntityManager wit
 
 그런 상황에서 선택할 수 있는 방안은 크게 2가지가 존재합니다.
 
-- **JPQL**을 사용하여 DB 데이터를 수정 및 삭제
+- `JPQL`을 사용하여 DB 데이터를 수정 및 삭제
 
-- **JPA Query Method**를 활용하여 DB 데이터를 수정 및 삭제
+- `JPA Query Method`를 활용하여 DB 데이터를 수정 및 삭제
 
 해당 글에서는 위와 같은 예외가 일어나지 않으면서, **JPQL** 혹은 **JPA Query Method**를 통해 DB의 데이터를 수정 및 삭제하려면 어떻게 구성해야하는지 알아보도록 하겠습니다.
 
