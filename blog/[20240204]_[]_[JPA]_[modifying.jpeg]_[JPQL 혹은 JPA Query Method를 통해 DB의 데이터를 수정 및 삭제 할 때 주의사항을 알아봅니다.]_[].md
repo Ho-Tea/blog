@@ -1,3 +1,11 @@
+## 3줄 요약
+- `InvalidDataAccessApiUsageException` 예외 발생
+- **update or delete** 와 같은 작업을 **JPQL**을 통해서 한다면 `@Modifying`, `@Transactional`을 붙여주어야 한다.
+- **update or delete** 와 같은 작업을 **JPA Query Method**을 통해서 한다면 `@Transactional`을 붙여주어야 한다.
+
+
+
+
 
 ## 문제 상황
 **JPQL** 혹은 **JPA Query Method**를 통해 DB의 데이터를 수정 및 삭제하는 경우, 아래와 같은 예외가 발생하였습니다.
@@ -40,7 +48,7 @@ org.springframework.dao.InvalidDataAccessApiUsageException: No EntityManager wit
 ### 가정
 
 > Service - `@Transactional 사용 X` <br>
->Repository - `@Modyfing 사용 X`
+>Repository - `@Modifying 사용 X`
 > 
 
 아래와 같이 JPQL을 통해 디비에 쿼리를 날리는 경우에도 정상적으로 삭제가 되지 않는 문제가 발생합니다.
@@ -50,13 +58,18 @@ org.springframework.dao.InvalidDataAccessApiUsageException: No EntityManager wit
 void deleteAllByMemoryIdInBatch(@Param("memoryId") Long memoryId);
 ```
 
-`Spring Data JPA`에서 JPQL로 작성된 **수정(UPDATE)** 또는 **삭제(DELETE)** 쿼리는 기본적으로 조회 쿼리로 간주되기 때문에 이 경우 **JPA는 변경 작업임을 인식하지 못하고 실행을 거부**합니다.
+![image](https://github.com/user-attachments/assets/731dabe8-76c3-447c-ba87-c6a8f04691c9)
+
+
+단순히 `@Transactional`만 설정해 놓는다면, `Spring Data JPA`에서 **JPQL**로 작성된 **수정(UPDATE)** 또는 **삭제(DELETE)** 쿼리는 기본적으로 조회 쿼리로 간주되기 때문에 이 경우 **JPA는 변경 작업임을 인식하지 못하고 실행을 거부**합니다.
 
 조회쿼리로 구성되기 때문에 `JPA Entity Manager`는 스냅샷은 찍지만 `flush`와 같은 데이터 반영 작업이 이루어지지 않기에, 더티체킹이 이루어지지 않게 됩니다.
 
-따라서 해당 경우에는 `Service` 딴에 `@Transactional`을 붙여주어야하고, `Repository` 딴에도 `@Modyfing`을 붙여주어야 합니다. 
+따라서 해당 경우에는 `Service` 딴에 `@Transactional`을 붙여주어야하고, `Repository` 딴에도 `@Modifying`을 붙여주어야 합니다. 
 
 - `@Modifying`은 JPA에게 이 쿼리가 **변경 작업**임을 알려주며, **조회 쿼리로 처리되지 않도록 합니다**.
+
+![image](https://github.com/user-attachments/assets/dfa5cb5c-6183-4cbd-88b3-dd765b199d79)
 
 여기서 **중요한 부분**은 `@Modifying`은 **데이터 변경 작업**을 위한 애노테이션이며, 트랜잭션을 관리하지 않는다는 점입니다. 따라서, 데이터베이스 변경 작업이 올바르게 커밋되려면 **트랜잭션이 활성화**되어 있어야 합니다.
 
@@ -66,13 +79,13 @@ void deleteAllByMemoryIdInBatch(@Param("memoryId") Long memoryId);
 
 - `JPQL`이 적용된 엔티티가 영속성 컨텍스트 내부에 존재하는 경우에만 특정 엔티티에 대해서 `flush()`가 일어남.
 - `JPQL`이 적용된 엔티티가 아닌 다른 엔티티가 영속성 컨텍스트 내부에 존재하는 경우에는 다른 엔티티를 대상으로 `flsuh()`가 일어나지 않음.
-- `@Modyfing`의 속성을 `flushAutomatically = true` 로 설정하게 되면 다른 엔티티가 영속성 컨텍스트 내부에 존재하더라도 모든 엔티티를 대상으로 `flush()`가 일어나게 됩니다.
+- `@Modifying`의 속성을 `flushAutomatically = true` 로 설정하게 되면 다른 엔티티가 영속성 컨텍스트 내부에 존재하더라도 모든 엔티티를 대상으로 `flush()`가 일어나게 됩니다.
 
 ---
 
 ### 결론
 
-**@Transactional과 @Modyfing을 붙여주어야 합니다.**
+**@Transactional과 @Modifying을 붙여주어야 합니다.**
 
 ```java
 // Service
@@ -96,13 +109,13 @@ void deleteAllByMemoryIdInBatch(@Param("memoryId") Long memoryId);
 > Service - `@Transactional 사용 X`
 > 
 
-아래와 같이 `JPA Query Method`를 사용하는 상황에서는 위의 `JPQL`를 사용하는 상황과 다르게 `JPA` 메서드 명명 규칙에 따라 자동으로 생성된 `deleteBy...()` 메서드는 `Spring Data JPA`가 **자동으로 데이터베이스 변경 작업으로 인식**하기 때문에 `@Modyfing`을 사용하지 않아도 됩니다.
+아래와 같이 `JPA Query Method`를 사용하는 상황에서는 위의 `JPQL`를 사용하는 상황과 다르게 `JPA` 메서드 명명 규칙에 따라 자동으로 생성된 `deleteBy...()` 메서드는 `Spring Data JPA`가 **자동으로 데이터베이스 변경 작업으로 인식**하기 때문에 `@Modifying`을 사용하지 않아도 됩니다.
 
 ```java
 deleteByMemberIdAndId(loginMember.getId(), id);
 ```
 
-하지만 JpaRepoistory 의 구현체의 delete 관련 메서드를 호출한 것이 아니라 우리가 직접 작성한 delete 관련 메서드를 호출한 것이기에 아래와는 다르게 @Transactional이 자동으로 붙어있지 않은 상태입니다. 
+하지만 **JpaRepoistory** 의 구현체의 `delete` 관련 메서드를 호출한 것이 아니라 우리가 직접 작성한 `delete` 관련 메서드를 호출한 것이기에 아래와는 다르게 `@Transactional`이 자동으로 붙어있지 않은 상태입니다. 
 
 일반적으로 JPA에서 **트랜잭션이 생성되지 않으면 영속성 컨텍스트는 생성되지 않습니다**. JPA의 `EntityManager`는 트랜잭션과 밀접하게 연결되어 있으며, 대부분의 경우 **트랜잭션이 시작될 때 영속성 컨텍스트가 생성**됩니다. 하지만 트랜잭션이 생성되지 않았기에 영속성 컨텍스트가 생성되지 않았고, 그로인해 `JPA Entity Manager`가 디비에 쓰기작업을 할 때 트랜잭션이 활성화 되어 있지 않다는 예외가 발생하게 되었습니다.
 
@@ -115,3 +128,7 @@ deleteByMemberIdAndId(loginMember.getId(), id);
 ### 결론
 
 **@Transactional을 붙여주어야 함, @Modyfing은 붙이지 않아도 됩니다.**
+
+
+## 같이 보면 좋을 글
+- 추가예정
