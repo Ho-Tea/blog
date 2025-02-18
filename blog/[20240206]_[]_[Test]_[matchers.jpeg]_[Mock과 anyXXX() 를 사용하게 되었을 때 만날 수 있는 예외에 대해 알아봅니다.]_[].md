@@ -29,7 +29,7 @@
 >Mockito는 stubbing을 위해 전달된 인자들을 캡처하여 내부에 기록하는데, 이때 모든 인자에 대해 일관되게 Matchers를 사용해야 합니다. 하나의 인자는 실제 객체(예, reservation)로, 다른 하나는 Matchers(예, any(PaymentResult.class))로 전달하면 내부적으로 매처의 개수가 일치하지 않아 예외가 발생합니다.
 
 
-## 그렇다면 정상적인 경우에는 어떤 호출이 이루어질까?
+### 그렇다면 정상적인 경우에는 어떤 호출이 이루어질까?
 
 1. **메서드 호출 인터셉트**
     - `when(...)` 구문 안에 있는 `reservationService.confirmReservationPayment(reservation, any(PaymentResult.class))` 호출은 실제로 실행되지 않습니다.
